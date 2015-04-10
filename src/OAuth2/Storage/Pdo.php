@@ -62,12 +62,16 @@ class Pdo implements
             'access_token_table' => 'oauth_access_tokens',
             'refresh_token_table' => 'oauth_refresh_tokens',
             'code_table' => 'oauth_authorization_codes',
-            'user_table' => 'oauth_users',
+            'user_table' => 'sys_user',
             'jwt_table'  => 'oauth_jwt',
             'jti_table'  => 'oauth_jti',
             'scope_table'  => 'oauth_scopes',
             'public_key_table'  => 'oauth_public_keys',
         ), $config);
+    }
+
+    public function getDb(){
+        return $this->db;
     }
 
     /* OAuth2\Storage\ClientCredentialsInterface */
@@ -215,7 +219,10 @@ class Pdo implements
     /* OAuth2\Storage\UserCredentialsInterface */
     public function checkUserCredentials($username, $password)
     {
-        if ($user = $this->getUser($username)) {
+        var_dump($username, $password);
+        $user = $this->getUser($username);
+        var_dump($user);
+        if ($user) {
             return $this->checkPassword($user, $password);
         }
 
@@ -300,7 +307,14 @@ class Pdo implements
     // plaintext passwords are bad!  Override this for your application
     protected function checkPassword($user, $password)
     {
+            var_dump($user['password'], $password, sha1($password));
         return $user['password'] == sha1($password);
+    }
+
+    protected function hashingFunction($input) {
+        //todo - add bcrypt here.
+        $output = $input;
+        return $output;
     }
 
     public function getUser($username)
