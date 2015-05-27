@@ -219,9 +219,7 @@ class Pdo implements
     /* OAuth2\Storage\UserCredentialsInterface */
     public function checkUserCredentials($username, $password)
     {
-        var_dump($username, $password);
         $user = $this->getUser($username);
-        var_dump($user);
         if ($user) {
             return $this->checkPassword($user, $password);
         }
@@ -304,16 +302,14 @@ class Pdo implements
         return $stmt->execute(compact('refresh_token'));
     }
 
-    // plaintext passwords are bad!  Override this for your application
     protected function checkPassword($user, $password)
     {
-            var_dump($user['password'], $password, sha1($password));
-        return $user['password'] == sha1($password);
+        return password_verify($password, $user['password']);
     }
 
     protected function hashingFunction($input) {
-        //todo - add bcrypt here.
-        $output = $input;
+        //$output contains all information to decode it - including hash type and salt.
+        $output = password_hash($input, PASSWORD_BCRYPT);
         return $output;
     }
 
