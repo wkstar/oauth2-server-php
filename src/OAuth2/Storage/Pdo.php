@@ -227,9 +227,33 @@ class Pdo implements
         return false;
     }
 
+    public function getUserScope($user_id)
+    {
+        $sql = "SELECT ua.ua_auth_pid,
+                    CASE user.us_admin
+                    WHEN '1'
+                    THEN '9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35'
+                    ELSE ua.ua_auth_code
+                    END AS ua_auth_code
+                FROM sys_user user
+                LEFT JOIN user_authority ua ON user.us_id=ua.ua_user_id
+                WHERE user.us_id = :user_id";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute(compact('user_id'));
+        $result = $stmt->fetch(\PDO::FETCH_BOTH);
+
+        //oAuth spec implies spaces are best
+        $scope = str_replace(',', ' ', $result['ua_auth_code']);
+        return $scope;
+    }
+
     public function getUserDetails($username)
     {
-        return $this->getUser($username);
+        $user = $this->getUser($username);
+        $user['scope'] = $this->getUserScope($user['us_id']);
+        return $user;
     }
 
     /* UserClaimsInterface */
@@ -315,7 +339,7 @@ class Pdo implements
 
     public function getUser($username)
     {
-        $stmt = $this->db->prepare($sql = sprintf('SELECT * from %s where username=:username', $this->config['user_table']));
+        $stmt = $this->db->prepare($sql = sprintf('SELECT * FROM %s WHERE username=:username', $this->config['user_table']));
         $stmt->execute(array('username' => $username));
 
         if (!$userInfo = $stmt->fetch(\PDO::FETCH_BOTH)) {
@@ -389,7 +413,6 @@ class Pdo implements
         if (!$clientDetails = $this->getClientDetails($client_id)) {
             return false;
         }
-
         if (isset($clientDetails['scope'])) {
             return $clientDetails['scope'];
         }

@@ -157,12 +157,15 @@ class TokenController implements TokenControllerInterface
          */
 
         $requestedScope = $this->scopeUtil->getScopeFromRequest($request);
+
+        //The scope of the User!
         $availableScope = $grantType->getScope();
 
         if ($requestedScope) {
             // validate the requested scope
             if ($availableScope) {
                 if (!$this->scopeUtil->checkScope($requestedScope, $availableScope)) {
+
                     $response->setError(400, 'invalid_scope', 'The scope requested is invalid for this request');
 
                     return null;
