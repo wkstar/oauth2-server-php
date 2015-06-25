@@ -11,6 +11,8 @@ use OAuth2\Storage\ScopeInterface as ScopeStorageInterface;
 class Scope implements ScopeInterface
 {
     protected $storage;
+    //Delimeters seperated by pipes |, e.g. a|b|c. No pipe for a single delimeter.
+    protected $delimeters = ',| ';
 
     /**
      * @param mixed @storage
@@ -29,6 +31,12 @@ class Scope implements ScopeInterface
         $this->storage = $storage;
     }
 
+    protected function explode($scopeString) {
+        $scopeString = trim($scopeString);
+        $regex = sprintf('/ (%s) /', $this->delimeters);
+        $scopeArr = preg_split($regex, $scopeString);
+    }
+
     /**
      * Check if everything in required scope is contained in available scope.
      *
@@ -45,8 +53,8 @@ class Scope implements ScopeInterface
      */
     public function checkScope($required_scope, $available_scope)
     {
-        $required_scope = explode(' ', trim($required_scope));
-        $available_scope = explode(' ', trim($available_scope));
+        $required_scope = $this->explode($required_scope);
+        $available_scope = $this->explode($available_scope);
 
         return (count(array_diff($required_scope, $available_scope)) == 0);
     }
@@ -63,7 +71,7 @@ class Scope implements ScopeInterface
     public function scopeExists($scope)
     {
         // Check reserved scopes first.
-        $scope = explode(' ', trim($scope));
+        $scope = $this->explode($scope);
         $reservedScope = $this->getReservedScopes();
         $nonReservedScopes = array_diff($scope, $reservedScope);
         if (count($nonReservedScopes) == 0) {
