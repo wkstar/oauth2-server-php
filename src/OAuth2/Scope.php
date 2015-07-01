@@ -33,8 +33,10 @@ class Scope implements ScopeInterface
 
     protected function explode($scopeString) {
         $scopeString = trim($scopeString);
-        $regex = sprintf('/ (%s) /', $this->delimeters);
+        $regex = sprintf('/(%s)/', $this->delimeters);
         $scopeArr = preg_split($regex, $scopeString);
+
+        return $scopeArr;
     }
 
     /**
