@@ -88,6 +88,10 @@ class ResourceController implements ResourceControllerInterface
                 return $token;
             }
         }
+        else {
+            //Empty token, or none provided.
+            $response->setError(403, 'absent_token', 'A valid access token must be supplied.');
+        }
 
         $authHeader = sprintf('%s realm="%s"', $this->tokenType->getTokenType(), $this->config['www_realm']);
 
